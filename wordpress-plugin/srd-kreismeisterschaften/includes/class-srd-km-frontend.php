@@ -324,7 +324,11 @@ class SRD_KM_Frontend {
 		if (!empty($dbYears)) {
 			$years = $dbYears;
 		}
+		$recent_years = array_slice($years, 0, 5);
+		$older_years  = array_slice($years, 5);
 		$r = $this->results_paths();
+		$accordion_id = 'srd-km-older-' . str_replace('.', '', uniqid('', true));
+		$collapse_id  = $accordion_id . '-collapse';
 
 		ob_start();
 		?>
@@ -351,45 +355,87 @@ class SRD_KM_Frontend {
 								</tr>
 							</thead>
 							<tbody>
-								<?php foreach ($years as $year) : ?>
-									<tr>
-										<td><strong><?php echo esc_html((string) $year); ?></strong></td>
-										<td class="text-center">
-											<a href="<?php echo esc_url($this->km_url(array('km_year' => (string) $year))); ?>" class="btn btn-outline-primary btn-sm">
-												<i class="bi bi-trophy me-1"></i><?php esc_html_e('Ergebnisse', 'srd-kreismeisterschaften'); ?>
-											</a>
-										</td>
-										<td class="text-center">
-											<?php echo $this->cell_lichtschiessen((int) $year, $r); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — Zelle liefert escaptes HTML ?>
-										</td>
-										<td class="text-center">
-											<?php if ((int) $year >= 2024) : ?>
-												<a href="<?php echo esc_url($this->km_url(array('km_year' => (string) $year, 'km_discipline' => 'bogen'))); ?>" class="btn btn-outline-success btn-sm">
-													<i class="bi bi-link-45deg me-1"></i><?php esc_html_e('Link', 'srd-kreismeisterschaften'); ?>
-												</a>
-											<?php else : ?>
-												<span class="text-muted">-</span>
-											<?php endif; ?>
-										</td>
-										<td class="text-center">
-											<?php if ((int) $year >= 2024) : ?>
-												<a href="<?php echo esc_url($this->km_url(array('km_year' => (string) $year, 'km_discipline' => 'blasrohr'))); ?>" class="btn btn-outline-success btn-sm">
-													<i class="bi bi-link-45deg me-1"></i><?php esc_html_e('Link', 'srd-kreismeisterschaften'); ?>
-												</a>
-											<?php else : ?>
-												<span class="text-muted">-</span>
-											<?php endif; ?>
-										</td>
-									</tr>
+								<?php foreach ($recent_years as $year) : ?>
+									<?php $this->render_overview_year_row((int) $year, $r); ?>
 								<?php endforeach; ?>
 							</tbody>
 						</table>
 					</div>
+					<?php if (!empty($older_years)) : ?>
+						<div class="accordion accordion-flush srd-km-overview-accordion" id="<?php echo esc_attr($accordion_id); ?>">
+							<div class="accordion-item border-0 border-top rounded-0">
+								<h3 class="accordion-header" id="<?php echo esc_attr($collapse_id); ?>-heading">
+									<button class="accordion-button collapsed py-3 rounded-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#<?php echo esc_attr($collapse_id); ?>" aria-expanded="false" aria-controls="<?php echo esc_attr($collapse_id); ?>">
+										<i class="bi bi-calendar-range me-2" aria-hidden="true"></i><?php echo esc_html(sprintf(/* translators: %d: Anzahl älterer Sportjahre in der Liste */ _n('%d weiteres Jahr', '%d weitere Jahre', count($older_years), 'srd-kreismeisterschaften'), count($older_years))); ?>
+									</button>
+								</h3>
+								<div id="<?php echo esc_attr($collapse_id); ?>" class="accordion-collapse collapse" data-bs-parent="#<?php echo esc_attr($accordion_id); ?>" role="region" aria-labelledby="<?php echo esc_attr($collapse_id); ?>-heading">
+									<div class="accordion-body p-0">
+										<div class="table-responsive">
+											<table class="table table-hover table-striped mb-0">
+												<thead class="table-primary">
+													<tr>
+														<th class="col-year"><?php esc_html_e('Jahr', 'srd-kreismeisterschaften'); ?></th>
+														<th class="col-equal text-center"><?php esc_html_e('Kugel', 'srd-kreismeisterschaften'); ?></th>
+														<th class="col-equal text-center"><?php esc_html_e('Lichtschießen', 'srd-kreismeisterschaften'); ?></th>
+														<th class="col-equal text-center"><?php esc_html_e('Bogen', 'srd-kreismeisterschaften'); ?></th>
+														<th class="col-equal text-center"><?php esc_html_e('Blasrohr', 'srd-kreismeisterschaften'); ?></th>
+													</tr>
+												</thead>
+												<tbody>
+													<?php foreach ($older_years as $year) : ?>
+														<?php $this->render_overview_year_row((int) $year, $r); ?>
+													<?php endforeach; ?>
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					<?php endif; ?>
 				</div>
 			</div>
 		</div>
 		<?php
 		return (string) ob_get_clean();
+	}
+
+	/**
+	 * @param array{path: string, url: string} $r
+	 */
+	private function render_overview_year_row(int $year, array $r): void {
+		?>
+		<tr>
+			<td><strong><?php echo esc_html((string) $year); ?></strong></td>
+			<td class="text-center">
+				<a href="<?php echo esc_url($this->km_url(array('km_year' => (string) $year))); ?>" class="btn btn-outline-primary btn-sm">
+					<i class="bi bi-trophy me-1"></i><?php esc_html_e('Ergebnisse', 'srd-kreismeisterschaften'); ?>
+				</a>
+			</td>
+			<td class="text-center">
+				<?php echo $this->cell_lichtschiessen($year, $r); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — Zelle liefert escaptes HTML ?>
+			</td>
+			<td class="text-center">
+				<?php if ($year >= 2024) : ?>
+					<a href="<?php echo esc_url($this->km_url(array('km_year' => (string) $year, 'km_discipline' => 'bogen'))); ?>" class="btn btn-outline-success btn-sm">
+						<i class="bi bi-link-45deg me-1"></i><?php esc_html_e('Link', 'srd-kreismeisterschaften'); ?>
+					</a>
+				<?php else : ?>
+					<span class="text-muted">-</span>
+				<?php endif; ?>
+			</td>
+			<td class="text-center">
+				<?php if ($year >= 2024) : ?>
+					<a href="<?php echo esc_url($this->km_url(array('km_year' => (string) $year, 'km_discipline' => 'blasrohr'))); ?>" class="btn btn-outline-success btn-sm">
+						<i class="bi bi-link-45deg me-1"></i><?php esc_html_e('Link', 'srd-kreismeisterschaften'); ?>
+					</a>
+				<?php else : ?>
+					<span class="text-muted">-</span>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<?php
 	}
 
 	/**
