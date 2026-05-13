@@ -1,0 +1,120 @@
+/* Modernes, ruhiges Farbschema und sanfte Kanten */
+
+html, body {
+	background-color: #f7f8fb;
+	color: #2c3e50;
+}
+
+.navbar.navbar-inverse {
+	background: linear-gradient(90deg, #243949 0%, #517fa4 100%);
+	border: none;
+}
+
+.navbar .navbar-brand img {
+	max-height: 36px;
+}
+
+.pmd-card,
+.pmd-card .pmd-card-body {
+	border-radius: 12px;
+}
+
+.pmd-card.pmd-z-depth {
+	box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+.btn.btn-success {
+	background: linear-gradient(135deg, #42a5f5 0%, #2ab7ee 100%);
+	border: none;
+}
+
+.btn.btn-success:hover {
+	filter: brightness(0.95);
+}
+
+.btn.btn-default {
+	background: #fff;
+	border: 1px solid #e6e9ef;
+}
+
+/* Tabellenlesbarkeit */
+table.table {
+	background: #fff;
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+table.table thead th {
+	background: #f0f3f8;
+	color: #455a64;
+	border-bottom: 1px solid #e6e9ef;
+}
+
+table.table tbody tr:hover {
+	background: #f9fbff;
+}
+
+/* Breadcrumb & Titel */
+.section-title span { color: #2c3e50; }
+.breadcrumb { background: transparent; }
+
+/* Footer */
+footer.admin-footer {
+	background: #fff;
+	border-top: 1px solid #e6e9ef;
+}
+
+/* Dark Mode */
+body.dark-mode {
+	background-color: #111418;
+	color: #e0e6ed;
+}
+
+body.dark-mode .navbar.navbar-inverse {
+	background: linear-gradient(90deg, #0b1620 0%, #1f2a44 100%);
+}
+
+body.dark-mode .pmd-card,
+body.dark-mode .pmd-card .pmd-card-body,
+body.dark-mode table.table {
+	background: #1a2230;
+	color: #e0e6ed;
+}
+
+body.dark-mode table.table thead th {
+	background: #131b26;
+	color: #c9d3df;
+	border-bottom-color: #2a3342;
+}
+
+body.dark-mode .btn.btn-default {
+	background: #0f1520;
+	border-color: #2a3342;
+	color: #e0e6ed;
+}
+
+body.dark-mode footer.admin-footer {
+	background: #0f1520;
+	border-top-color: #2a3342;
+}
+
+/* Kartenraster Startseite */
+.total-sales .pmd-card-body h3 {
+	margin-top: 8px;
+	margin-bottom: 12px;
+}
+
+/* Datatables Suchfeld optisch integrieren */
+.search-paper input[type="search"] {
+	border-radius: 8px !important;
+	border: 1px solid #e6e9ef !important;
+	background: #fff !important;
+}
+
+/* Mobile Tweaks */
+@media (max-width: 767px) {
+	.pmd-card .pmd-card-body { padding: 16px; }
+	.total-sales .col-sm-4 { padding: 4px !important; }
+}
+
+

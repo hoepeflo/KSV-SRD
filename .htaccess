@@ -1,0 +1,16 @@
+# Eigene Fehlermeldungen externer Speicherort
+ErrorDocument 404 srd.ksv-fallingbostel.de/index.php
+
+# Aktiviere HTTPS
+#RewriteEngine On
+#RewriteCond %{Server_Port} !=443
+#RewriteRule ^(.*)$ https://srd.ksv-fallingbostel.de/$1 [R=301, L]
+
+
+
+
+
+
+
+
+
