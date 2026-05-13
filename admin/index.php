@@ -50,8 +50,8 @@ if (!isset($_SESSION['auth']) || $_SESSION['auth'] !== true) {
 				Angemeldet als <strong><?php echo htmlspecialchars($cfg['username']); ?></strong>
 			</div>
 
-			<div class="row mb-4">
-				<div class="col-md-6">
+			<div class="row mb-4 g-3">
+				<div class="col-md-4">
 					<div class="card h-100">
 						<div class="card-body text-center">
 							<i class="bi bi-cloud-upload display-4 text-primary mb-3"></i>
@@ -63,7 +63,19 @@ if (!isset($_SESSION['auth']) || $_SESSION['auth'] !== true) {
 						</div>
 					</div>
 				</div>
-				<div class="col-md-6">
+				<div class="col-md-4">
+					<div class="card h-100">
+						<div class="card-body text-center">
+							<i class="bi bi-database-down display-4 text-primary mb-3"></i>
+							<h5 class="card-title">SQL-Export</h5>
+							<p class="card-text">Ausgewählte Datenbanktabellen als <code>.sql</code> sichern</p>
+							<a href="sql_export.php" class="btn btn-primary">
+								<i class="bi bi-download me-1"></i>Export starten
+							</a>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4">
 					<div class="card h-100">
 						<div class="card-body text-center">
 							<i class="bi bi-info-circle display-4 text-info mb-3"></i>
