@@ -329,16 +329,8 @@ class SRD_KM_Frontend {
 		ob_start();
 		?>
 		<div class="srd-km-wrap container-fluid py-2">
-			<nav aria-label="breadcrumb">
-				<ol class="breadcrumb">
-					<li class="breadcrumb-item"><a href="<?php echo esc_url($this->home_breadcrumb_url()); ?>"><?php esc_html_e('Ergebnishistorie', 'srd-kreismeisterschaften'); ?></a></li>
-					<li class="breadcrumb-item active"><?php esc_html_e('Kreismeisterschaften', 'srd-kreismeisterschaften'); ?></li>
-					<li class="breadcrumb-item active"><?php esc_html_e('Jahr auswählen', 'srd-kreismeisterschaften'); ?></li>
-				</ol>
-			</nav>
 			<div class="row mb-3">
 				<div class="col">
-					<h1 class="h2 fw-bold text-primary"><?php esc_html_e('Kreismeisterschaften', 'srd-kreismeisterschaften'); ?></h1>
 					<p class="lead text-muted"><?php esc_html_e('Ergebnisse der Kreismeisterschaften', 'srd-kreismeisterschaften'); ?></p>
 				</div>
 			</div>
