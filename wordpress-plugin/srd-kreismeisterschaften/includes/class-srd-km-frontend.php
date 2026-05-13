@@ -73,13 +73,36 @@ class SRD_KM_Frontend {
 		);
 	}
 
+	private function use_pretty_urls(): bool {
+		$s = srd_km_get_settings();
+		if (empty($s['rewrite_enabled']) || empty($s['page_id'])) {
+			return false;
+		}
+		if (get_option('permalink_structure', '') === '') {
+			return false;
+		}
+		return true;
+	}
+
+	private function rewrite_slug(): string {
+		$s = srd_km_get_settings();
+		$slug = isset($s['rewrite_slug']) ? sanitize_title((string) $s['rewrite_slug']) : 'kreismeisterschaften';
+		return $slug !== '' ? $slug : 'kreismeisterschaften';
+	}
+
+	/**
+	 * Basis-URL der KM-Oberfläche (Shortcode-Seite oder Pretty-Slug).
+	 */
 	private function km_base_url(): string {
+		if ($this->use_pretty_urls()) {
+			return trailingslashit(home_url(user_trailingslashit($this->rewrite_slug())));
+		}
 		$s = srd_km_get_settings();
 		$page_id = (int) ($s['page_id'] ?? 0);
 		if ($page_id > 0) {
-			return get_permalink($page_id) ?: home_url('/');
+			return trailingslashit(get_permalink($page_id) ?: home_url('/'));
 		}
-		return get_permalink() ?: home_url('/');
+		return trailingslashit(get_permalink() ?: home_url('/'));
 	}
 
 	private function home_breadcrumb_url(): string {
@@ -89,10 +112,89 @@ class SRD_KM_Frontend {
 	}
 
 	/**
-	 * @param array<string, string> $args
+	 * Roh-HTML für iframe (Pretty oder Query-Parameter).
+	 */
+	private function km_raw_url(int $year, string $art, string $id): string {
+		if ($this->use_pretty_urls()) {
+			$path = $this->rewrite_slug() . '/' . $year . '/' . $art . '/' . rawurlencode($id) . '/raw/';
+			return trailingslashit(home_url(user_trailingslashit($path)));
+		}
+		return add_query_arg(
+			array(
+				'km_view' => 'raw',
+				'km_year' => (string) $year,
+				'km_id'   => $id,
+				'km_art'  => $art,
+			),
+			$this->km_base_url()
+		);
+	}
+
+	/**
+	 * @param array<string, string> $args km_year, km_discipline, km_id, km_art
 	 */
 	private function km_url(array $args = array()): string {
-		return add_query_arg($args, $this->km_base_url());
+		if (!$this->use_pretty_urls()) {
+			return add_query_arg($args, $this->km_base_url());
+		}
+		$slug = $this->rewrite_slug();
+		$year = isset($args['km_year']) ? absint($args['km_year']) : 0;
+		$disc = isset($args['km_discipline']) ? sanitize_key((string) $args['km_discipline']) : '';
+		$id = isset($args['km_id']) ? (string) $args['km_id'] : '';
+		$art = isset($args['km_art']) ? (string) $args['km_art'] : '';
+
+		$path = $slug . '/';
+		if ($year > 0 && $id !== '' && $art !== '' && in_array($art, array('e', 'm'), true) && $this->is_safe_file_id($id)) {
+			$path .= $year . '/' . $art . '/' . rawurlencode($id) . '/';
+		} elseif ($year > 0 && $disc === 'bogen') {
+			$path .= $year . '/bogen/';
+		} elseif ($year > 0 && $disc === 'blasrohr') {
+			$path .= $year . '/blasrohr/';
+		} elseif ($year > 0) {
+			$path .= $year . '/';
+		}
+
+		return trailingslashit(home_url(user_trailingslashit($path)));
+	}
+
+	private function request_year(): int {
+		$y = get_query_var('srd_km_year');
+		if ($y !== '' && $y !== false && $y !== null) {
+			return absint($y);
+		}
+		return isset($_GET['km_year']) ? absint(wp_unslash($_GET['km_year'])) : 0;
+	}
+
+	private function request_discipline(): string {
+		$d = get_query_var('srd_km_discipline');
+		if (is_string($d) && $d !== '') {
+			return sanitize_key($d);
+		}
+		return isset($_GET['km_discipline']) ? sanitize_key((string) wp_unslash($_GET['km_discipline'])) : '';
+	}
+
+	private function request_id(): string {
+		$i = get_query_var('srd_km_id');
+		if (is_string($i) && $i !== '') {
+			return (string) wp_unslash($i);
+		}
+		return isset($_GET['km_id']) ? (string) wp_unslash($_GET['km_id']) : '';
+	}
+
+	private function request_art(): string {
+		$a = get_query_var('srd_km_art');
+		if (is_string($a) && $a !== '') {
+			return (string) wp_unslash($a);
+		}
+		return isset($_GET['km_art']) ? (string) wp_unslash($_GET['km_art']) : '';
+	}
+
+	private function request_is_raw(): bool {
+		$r = get_query_var('srd_km_raw');
+		if ($r === '1' || $r === 1) {
+			return true;
+		}
+		return isset($_GET['km_view']) && (string) wp_unslash($_GET['km_view']) === 'raw';
 	}
 
 	/**
@@ -125,7 +227,7 @@ class SRD_KM_Frontend {
 	}
 
 	public function maybe_serve_raw_html(): void {
-		if (!isset($_GET['km_view']) || $_GET['km_view'] !== 'raw') {
+		if (!$this->request_is_raw()) {
 			return;
 		}
 		$s = srd_km_get_settings();
@@ -142,9 +244,9 @@ class SRD_KM_Frontend {
 				return;
 			}
 		}
-		$year = isset($_GET['km_year']) ? absint($_GET['km_year']) : 0;
-		$id = isset($_GET['km_id']) ? (string) wp_unslash($_GET['km_id']) : '';
-		$art = isset($_GET['km_art']) ? (string) wp_unslash($_GET['km_art']) : '';
+		$year = $this->request_year();
+		$id = $this->request_id();
+		$art = $this->request_art();
 		if ($year < 1990 || $year > 2100 || !$this->is_safe_file_id($id) || !in_array($art, array('e', 'm'), true)) {
 			status_header(400);
 			nocache_headers();
@@ -184,6 +286,11 @@ class SRD_KM_Frontend {
 				esc_html__('Tipp: Unter Einstellungen → SRD Kreismeisterschaften die KM-Seite festlegen, damit alle Links stabil auf dieselbe URL zeigen.', 'srd-kreismeisterschaften') .
 				'</div>';
 		}
+		if (current_user_can('manage_options') && !empty($s['rewrite_enabled']) && get_option('permalink_structure', '') === '') {
+			$admin_tip .= '<div class="alert alert-info">' .
+				esc_html__('Pretty-URLs sind aktiviert, aber WordPress nutzt noch „Einfache“ Permalinks. Unter Einstellungen → Permalinks eine andere Struktur wählen und speichern.', 'srd-kreismeisterschaften') .
+				'</div>';
+		}
 		$r = $this->results_paths();
 		if (!is_dir($r['path'])) {
 			return $admin_tip . '<div class="srd-km-wrap"><div class="alert alert-danger">' .
@@ -191,11 +298,11 @@ class SRD_KM_Frontend {
 				'</div></div>';
 		}
 
-		$year = isset($_GET['km_year']) ? absint($_GET['km_year']) : 0;
+		$year = $this->request_year();
 		$year = ($year > 0) ? $year : 0;
-		$disc = isset($_GET['km_discipline']) ? sanitize_key((string) wp_unslash($_GET['km_discipline'])) : '';
-		$id = isset($_GET['km_id']) ? (string) wp_unslash($_GET['km_id']) : '';
-		$art = isset($_GET['km_art']) ? (string) wp_unslash($_GET['km_art']) : '';
+		$disc = $this->request_discipline();
+		$id = $this->request_id();
+		$art = $this->request_art();
 
 		$body = $this->render_overview();
 		if ($disc === 'bogen' && $year > 0) {
@@ -468,15 +575,7 @@ class SRD_KM_Frontend {
 		if ($this->resolve_under_results($rel) === null) {
 			return '<div class="srd-km-wrap"><div class="alert alert-warning">' . esc_html__('Die angeforderte Ergebnisdatei existiert nicht.', 'srd-kreismeisterschaften') . '</div></div>';
 		}
-		$iframe_src = add_query_arg(
-			array(
-				'km_view'  => 'raw',
-				'km_year'  => (string) $jahr,
-				'km_id'    => $id,
-				'km_art'   => $art,
-			),
-			$this->km_base_url()
-		);
+		$iframe_src = $this->km_raw_url($jahr, $art, $id);
 		ob_start();
 		?>
 		<div class="srd-km-wrap container-fluid py-2">

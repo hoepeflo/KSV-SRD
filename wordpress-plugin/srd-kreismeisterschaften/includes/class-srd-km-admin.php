@@ -66,6 +66,9 @@ class SRD_KM_Admin {
 		$out['results_path'] = isset($input['results_path']) ? sanitize_text_field((string) $input['results_path']) : '';
 		$out['results_url'] = isset($input['results_url']) ? esc_url_raw((string) $input['results_url']) : '';
 		$out['home_url_custom'] = isset($input['home_url_custom']) ? esc_url_raw((string) $input['home_url_custom']) : '';
+		$out['rewrite_enabled'] = empty($input['rewrite_enabled']) ? 0 : 1;
+		$slug = isset($input['rewrite_slug']) ? sanitize_title((string) $input['rewrite_slug']) : 'kreismeisterschaften';
+		$out['rewrite_slug'] = $slug !== '' ? $slug : 'kreismeisterschaften';
 		return $out;
 	}
 
@@ -96,7 +99,21 @@ class SRD_KM_Admin {
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e('Datenbank', 'srd-kreismeisterschaften'); ?></th>
+						<th scope="row"><?php esc_html_e('Pretty-Permalinks', 'srd-kreismeisterschaften'); ?></th>
+						<td>
+							<input type="hidden" name="srd_km_settings[rewrite_enabled]" value="0" />
+							<label>
+								<input type="checkbox" name="srd_km_settings[rewrite_enabled]" value="1" <?php checked(!empty($s['rewrite_enabled'])); ?> />
+								<?php esc_html_e('Schöne URLs unter einem eigenen Slug (z. B. /kreismeisterschaften/2025/)', 'srd-kreismeisterschaften'); ?>
+							</label>
+							<p class="description"><?php esc_html_e('Erfordert eine gewählte KM-Seite und WordPress-Permalinks ≠ „Einfach“. Nach Änderungen werden die Rewrite-Regeln automatisch neu geschrieben.', 'srd-kreismeisterschaften'); ?></p>
+							<p>
+								<label for="srd_km_rewrite_slug"><?php esc_html_e('URL-Slug', 'srd-kreismeisterschaften'); ?><br />
+									<input type="text" class="regular-text" name="srd_km_settings[rewrite_slug]" id="srd_km_rewrite_slug" value="<?php echo esc_attr((string) ($s['rewrite_slug'] ?? 'kreismeisterschaften')); ?>" /></label>
+							</p>
+							<p class="description"><?php esc_html_e('Der Slug darf nicht mit einer anderen öffentlichen Route kollidieren (z. B. gleichlautende Seite).', 'srd-kreismeisterschaften'); ?></p>
+						</td>
+					</tr>
 						<td>
 							<input type="hidden" name="srd_km_settings[db_use_wp]" value="0" />
 							<label>
