@@ -324,7 +324,6 @@ class SRD_KM_Frontend {
 		if (!empty($dbYears)) {
 			$years = $dbYears;
 		}
-		$years = $this->merge_sportjahr_season_preview($years);
 		$recent_years = array_slice($years, 0, 5);
 		$older_years  = array_slice($years, 5);
 		$r = $this->results_paths();
@@ -427,6 +426,43 @@ class SRD_KM_Frontend {
 		$list = array_values($out);
 		rsort($list, SORT_NUMERIC);
 		return $list;
+	}
+
+	/**
+	 * @param array{path: string, url: string} $r
+	 */
+	private function render_overview_year_row(int $year, array $r): void {
+		?>
+		<tr>
+			<td><strong><?php echo esc_html((string) $year); ?></strong></td>
+			<td class="text-center">
+				<a href="<?php echo esc_url($this->km_url(array('km_year' => (string) $year))); ?>" class="btn btn-outline-primary btn-sm">
+					<i class="bi bi-trophy me-1"></i><?php esc_html_e('Ergebnisse', 'srd-kreismeisterschaften'); ?>
+				</a>
+			</td>
+			<td class="text-center">
+				<?php echo $this->cell_lichtschiessen($year, $r); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — Zelle liefert escaptes HTML ?>
+			</td>
+			<td class="text-center">
+				<?php if ($year >= 2024) : ?>
+					<a href="<?php echo esc_url($this->km_url(array('km_year' => (string) $year, 'km_discipline' => 'bogen'))); ?>" class="btn btn-outline-success btn-sm">
+						<i class="bi bi-link-45deg me-1"></i><?php esc_html_e('Link', 'srd-kreismeisterschaften'); ?>
+					</a>
+				<?php else : ?>
+					<span class="text-muted">-</span>
+				<?php endif; ?>
+			</td>
+			<td class="text-center">
+				<?php if ($year >= 2024) : ?>
+					<a href="<?php echo esc_url($this->km_url(array('km_year' => (string) $year, 'km_discipline' => 'blasrohr'))); ?>" class="btn btn-outline-success btn-sm">
+						<i class="bi bi-link-45deg me-1"></i><?php esc_html_e('Link', 'srd-kreismeisterschaften'); ?>
+					</a>
+				<?php else : ?>
+					<span class="text-muted">-</span>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<?php
 	}
 
 	/**
