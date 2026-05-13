@@ -1,10 +1,11 @@
 /* SRD Kreismeisterschaften – eingebettet im Theme (ohne Sidebar-Layout) */
 .srd-km-wrap {
-	--bs-primary: #7fb069;
-	--bs-primary-rgb: 127, 176, 105;
-	--bs-success: #9bc47a;
-	--bs-success-rgb: 155, 196, 122;
-	--bs-link-color: #7fb069;
+	--bs-primary: #2f6806;
+	--bs-primary-rgb: 47, 104, 6;
+	/* Etwas helleres Grün für Erfolgs-Buttons, bleibt in derselben Tonfamilie */
+	--bs-success: #3d7f0f;
+	--bs-success-rgb: 61, 127, 15;
+	--bs-link-color: #2f6806;
 }
 
 .srd-km-wrap .card {
