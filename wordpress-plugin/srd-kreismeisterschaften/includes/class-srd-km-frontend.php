@@ -324,6 +324,7 @@ class SRD_KM_Frontend {
 		if (!empty($dbYears)) {
 			$years = $dbYears;
 		}
+		$years = $this->merge_sportjahr_season_preview($years);
 		$recent_years = array_slice($years, 0, 5);
 		$older_years  = array_slice($years, 5);
 		$r = $this->results_paths();
@@ -399,6 +400,33 @@ class SRD_KM_Frontend {
 		</div>
 		<?php
 		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Ab 01.10. des Kalenderjahres das Folge-Sportjahr (Kalenderjahr + 1) in der Liste führen,
+	 * sofern es noch nicht aus der Datenbank/Fallback stammt (Saisonwechsel).
+	 *
+	 * @param int[] $years
+	 * @return int[] Absteigend sortiert, eindeutig
+	 */
+	private function merge_sportjahr_season_preview(array $years): array {
+		$out = array();
+		foreach ($years as $y) {
+			$y = (int) $y;
+			if ($y >= 1990 && $y <= 2100) {
+				$out[ $y ] = $y;
+			}
+		}
+		$dt = current_datetime();
+		if ((int) $dt->format('n') >= 10) {
+			$preview = (int) $dt->format('Y') + 1;
+			if ($preview <= 2100) {
+				$out[ $preview ] = $preview;
+			}
+		}
+		$list = array_values($out);
+		rsort($list, SORT_NUMERIC);
+		return $list;
 	}
 
 	/**
