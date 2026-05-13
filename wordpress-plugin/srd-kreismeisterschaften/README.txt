@@ -7,7 +7,7 @@ Installation
 2. Im WordPress-Backend Plugin aktivieren.
 3. Den kompletten Inhalt des bisherigen `results`-Verzeichnisses auf den Server legen, z. B. nach `wp-content/uploads/srd-results/`.
 4. Unter „Einstellungen“ → „SRD Kreismeisterschaften“:
-   - Seite wählen, die nur den Shortcode `[srd_km]` enthält (oder Seite anlegen und Shortcode einfügen).
+   - Seite wählen, die den Shortcode `[srd_km]` enthält (Klassischer Editor oder Shortcode-Block; der Text `[srd_km]` muss im Seiteninhalt vorkommen).
    - Optional: absoluten Pfad und öffentliche URL zu diesem `results`-Ordner setzen (Standard: `wp-content/uploads/srd-results`).
    - Datenbank: wenn `srd_kreis_v3` in derselben Datenbank wie WordPress liegt, „WordPress-Datenbank verwenden“ aktiv lassen.
 
