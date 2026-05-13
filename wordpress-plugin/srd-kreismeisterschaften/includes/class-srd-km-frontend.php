@@ -402,6 +402,70 @@ class SRD_KM_Frontend {
 	}
 
 	/**
+	 * Ab 01.10. des Kalenderjahres das Folge-Sportjahr (Kalenderjahr + 1) in der Liste führen,
+	 * sofern es noch nicht aus der Datenbank/Fallback stammt (Saisonwechsel).
+	 *
+	 * @param int[] $years
+	 * @return int[] Absteigend sortiert, eindeutig
+	 */
+	private function merge_sportjahr_season_preview(array $years): array {
+		$out = array();
+		foreach ($years as $y) {
+			$y = (int) $y;
+			if ($y >= 1990 && $y <= 2100) {
+				$out[ $y ] = $y;
+			}
+		}
+		$dt = current_datetime();
+		if ((int) $dt->format('n') >= 10) {
+			$preview = (int) $dt->format('Y') + 1;
+			if ($preview <= 2100) {
+				$out[ $preview ] = $preview;
+			}
+		}
+		$list = array_values($out);
+		rsort($list, SORT_NUMERIC);
+		return $list;
+	}
+
+	/**
+	 * @param array{path: string, url: string} $r
+	 */
+	private function render_overview_year_row(int $year, array $r): void {
+		?>
+		<tr>
+			<td><strong><?php echo esc_html((string) $year); ?></strong></td>
+			<td class="text-center">
+				<a href="<?php echo esc_url($this->km_url(array('km_year' => (string) $year))); ?>" class="btn btn-outline-primary btn-sm">
+					<i class="bi bi-trophy me-1"></i><?php esc_html_e('Ergebnisse', 'srd-kreismeisterschaften'); ?>
+				</a>
+			</td>
+			<td class="text-center">
+				<?php echo $this->cell_lichtschiessen($year, $r); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped — Zelle liefert escaptes HTML ?>
+			</td>
+			<td class="text-center">
+				<?php if ($year >= 2024) : ?>
+					<a href="<?php echo esc_url($this->km_url(array('km_year' => (string) $year, 'km_discipline' => 'bogen'))); ?>" class="btn btn-outline-success btn-sm">
+						<i class="bi bi-link-45deg me-1"></i><?php esc_html_e('Link', 'srd-kreismeisterschaften'); ?>
+					</a>
+				<?php else : ?>
+					<span class="text-muted">-</span>
+				<?php endif; ?>
+			</td>
+			<td class="text-center">
+				<?php if ($year >= 2024) : ?>
+					<a href="<?php echo esc_url($this->km_url(array('km_year' => (string) $year, 'km_discipline' => 'blasrohr'))); ?>" class="btn btn-outline-success btn-sm">
+						<i class="bi bi-link-45deg me-1"></i><?php esc_html_e('Link', 'srd-kreismeisterschaften'); ?>
+					</a>
+				<?php else : ?>
+					<span class="text-muted">-</span>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<?php
+	}
+
+	/**
 	 * @param array{path: string, url: string} $r
 	 */
 	private function render_overview_year_row(int $year, array $r): void {
